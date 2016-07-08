@@ -11,7 +11,7 @@ email: solardatov@gmail.com
 description: > # this means to ignore newlines until "baseurl:"
   Tech notes, code snippets and ideas to take a look after few years and smile :)
 baseurl: "" # the subpath of your site, e.g. /blog
-url: "http://soldatov.org" # the base hostname & protocol for your site
+url: "http://127.0.0.1:4000" # the base hostname & protocol for your site
 linkedin_username: vsoldatov
 github_username:  solardatov
 twitter_username: solardatov
