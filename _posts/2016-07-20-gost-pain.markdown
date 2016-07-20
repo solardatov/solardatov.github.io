@@ -1,0 +1,26 @@
+---
+layout: post
+title:  "Playing GOST on mobile"
+date:   2016-07-20 18:56:18 +0300
+categories: libcurl openssl gost mobile
+published: false
+comments: true
+---
+
+Some days ago I had to implement [GOST] support in our mobile framework and since there was some difficulties i want to share my expierence. Probably it will be useful not only for GOST, but other external engines. First of all, we use libcurl+openssl to create/manage SSL connections and [this] project to produce libcurl+openssl prebuilts for iOS and Android. First bad news was GOST was not enabled by default and it was easy bypassed by adding -DHAVE_OPENSSL_ENGINE_H and -DHAVE_ENGINE_LOAD_BUILTIN_ENGINES to define appropriate defs in the libcurl sources. Now according to runtime traces we had GOST engine loaded but SSL connection still being with [curl code 35]. Traces showed that GOST engine is loaded, but sniffed TLS hello packet didn't contain GOST in available ciphers list. 
+
+After some investigation I have found the issue is in [ssl_ciph.c], function `ssl_cipher_get_disabled`. [This code] is failed because `ssl_mac_pkey_id[SSL_MD_GOST89MAC_IDX]` had `NID_undef` instead of valid value. As result GOST was excluded from ciphers list.
+
+{% highlight cpp %}
+    *mac |= (ssl_digest_methods[SSL_MD_GOST89MAC_IDX] == NULL
+             || ssl_mac_pkey_id[SSL_MD_GOST89MAC_IDX] ==
+             NID_undef) ? SSL_GOST89MAC : 0;
+{% endhighlight %}
+
+Next, I have found `ssl_mac_pkey_id[SSL_MD_GOST89MAC_IDX]` is propely initialized 
+
+[GOST]: https://en.wikipedia.org/wiki/GOST 
+[this]: https://github.com/gcesarmza/curl-android-ios
+[curl code 35]: https://curl.haxx.se/libcurl/c/libcurl-errors.html#CURLESSLCONNECTERROR
+[ssl_ciph.c]: https://github.com/openssl/openssl/blob/57ac73fb5d0a878f282cbcd9e7951c77fdc59e3c/ssl/ssl_ciph.c#L699
+[This code]: https://github.com/openssl/openssl/blob/57ac73fb5d0a878f282cbcd9e7951c77fdc59e3c/ssl/ssl_ciph.c#L789
