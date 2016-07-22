@@ -1,0 +1,33 @@
+---
+layout: post
+title:  "Injecting page-level cipher into SQLite"
+date:   2016-07-22 18:56:18 +0300
+categories: openssl sqlite
+published: true
+comments: true
+---
+
+Some days ago I had to implement GOST ciphers support in our mobile framework and since there was some difficulties i want to share my expierence. Probably it will be useful not only for GOST, but for other external engines. 
+<!--more-->
+
+First of all, we use libcurl+openssl to create/manage SSL connections and did fork of [this] project to produce libcurl+openssl prebuilts for iOS and Android. OpenSSL version is 1.0.1s and this version still have ccgost in engines directory. First bad news was GOST was not enabled by default, but it was easy bypassed by adding `-DHAVE_OPENSSL_ENGINE_H` and `-DHAVE_ENGINE_LOAD_BUILTIN_ENGINES` to define appropriate defs in the libcurl sources. 
+
+Now according to runtime traces we had GOST engine loaded but SSL connection still being failed with [curl code 35]. Traces showed that GOST engine is loaded, but sniffed TLS hello packet didn't contain GOST in available ciphers list. After some investigation I have found the issue is in [ssl_ciph.c], function `ssl_cipher_get_disabled`. [This code] is failed because `ssl_mac_pkey_id[SSL_MD_GOST89MAC_IDX]` had `NID_undef` instead of valid value. As result GOST was excluded from ciphers list.
+
+{% highlight cpp %}
+    *mac |= (ssl_digest_methods[SSL_MD_GOST89MAC_IDX] == NULL
+             || ssl_mac_pkey_id[SSL_MD_GOST89MAC_IDX] ==
+             NID_undef) ? SSL_GOST89MAC : 0;
+{% endhighlight %}
+
+Next, I have found `ssl_mac_pkey_id[SSL_MD_GOST89MAC_IDX]` is initialized in [ssl_load_ciphers()] and `get_optional_pkey_id("gost-mac")` fails on this stage and returns NULL pointer. Probably this issue appears only if we load GOST as built-in engine. As quick fix I added extra `ssl_mac_pkey_id[SSL_MD_GOST89MAC_IDX]` [initialization] in [ssl_cipher_get_disabled] and it fixed the problem.
+
+
+[GOST]: https://en.wikipedia.org/wiki/GOST 
+[this]: https://github.com/gcesarmza/curl-android-ios
+[curl code 35]: https://curl.haxx.se/libcurl/c/libcurl-errors.html#CURLESSLCONNECTERROR
+[ssl_ciph.c]: https://github.com/openssl/openssl/blob/57ac73fb5d0a878f282cbcd9e7951c77fdc59e3c/ssl/ssl_ciph.c#L699
+[This code]: https://github.com/openssl/openssl/blob/57ac73fb5d0a878f282cbcd9e7951c77fdc59e3c/ssl/ssl_ciph.c#L789
+[ssl_load_ciphers()]: https://github.com/openssl/openssl/blob/57ac73fb5d0a878f282cbcd9e7951c77fdc59e3c/ssl/ssl_ciph.c#L432
+[initilization]: https://github.com/solardatov/curl-android-ios/blob/master/ssl_ciph.patch#L7
+[ssl_cipher_get_disabled]: https://github.com/openssl/openssl/blob/57ac73fb5d0a878f282cbcd9e7951c77fdc59e3c/ssl/ssl_ciph.c#L750
