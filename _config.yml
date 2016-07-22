@@ -16,5 +16,7 @@ linkedin_username: vsoldatov
 github_username:  solardatov
 twitter_username: solardatov
 
+excerpt_separator: <!--more-->
+
 # Build settings
 markdown: kramdown

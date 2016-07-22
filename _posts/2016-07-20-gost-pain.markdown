@@ -7,9 +7,12 @@ published: true
 comments: true
 ---
 
-Some days ago I had to implement [GOST] support in our mobile framework and since there was some difficulties i want to share my expierence. Probably it will be useful not only for GOST, but for other external engines. First of all, we use libcurl+openssl to create/manage SSL connections and [this] project to produce libcurl+openssl prebuilts for iOS and Android. OpenSSL version is 1.0.1s and this version still have ccgost in engines directory. First bad news was GOST was not enabled by default and it was easy bypassed by adding -DHAVE_OPENSSL_ENGINE_H and -DHAVE_ENGINE_LOAD_BUILTIN_ENGINES to define appropriate defs in the libcurl sources. Now according to runtime traces we had GOST engine loaded but SSL connection still being failed with [curl code 35]. Traces showed that GOST engine is loaded, but sniffed TLS hello packet didn't contain GOST in available ciphers list. 
+Some days ago I had to implement GOST ciphers support in our mobile framework and since there was some difficulties i want to share my expierence. Probably it will be useful not only for GOST, but for other external engines. 
+<!--more-->
 
-After some investigation I have found the issue is in [ssl_ciph.c], function `ssl_cipher_get_disabled`. [This code] is failed because `ssl_mac_pkey_id[SSL_MD_GOST89MAC_IDX]` had `NID_undef` instead of valid value. As result GOST was excluded from ciphers list.
+First of all, we use libcurl+openssl to create/manage SSL connections and [this] project to produce libcurl+openssl prebuilts for iOS and Android. OpenSSL version is 1.0.1s and this version still have ccgost in engines directory. First bad news was GOST was not enabled by default, but it was easy bypassed by adding `-DHAVE_OPENSSL_ENGINE_H` and `-DHAVE_ENGINE_LOAD_BUILTIN_ENGINES` to define appropriate defs in the libcurl sources. 
+
+Now according to runtime traces we had GOST engine loaded but SSL connection still being failed with [curl code 35]. Traces showed that GOST engine is loaded, but sniffed TLS hello packet didn't contain GOST in available ciphers list. After some investigation I have found the issue is in [ssl_ciph.c], function `ssl_cipher_get_disabled`. [This code] is failed because `ssl_mac_pkey_id[SSL_MD_GOST89MAC_IDX]` had `NID_undef` instead of valid value. As result GOST was excluded from ciphers list.
 
 {% highlight cpp %}
     *mac |= (ssl_digest_methods[SSL_MD_GOST89MAC_IDX] == NULL
