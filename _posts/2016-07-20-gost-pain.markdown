@@ -22,6 +22,8 @@ Now according to runtime traces we had GOST engine loaded but SSL connection sti
 
 Next, I have found `ssl_mac_pkey_id[SSL_MD_GOST89MAC_IDX]` is initialized in [ssl_load_ciphers()] and `get_optional_pkey_id("gost-mac")` fails on this stage and returns NULL pointer. Probably this issue appears only if we load GOST as built-in engine. As quick fix I added extra `ssl_mac_pkey_id[SSL_MD_GOST89MAC_IDX]` [initialization] in [ssl_cipher_get_disabled] and it fixed the problem.
 
+Github: [https://github.com/solardatov/curl-android-ios]
+
 
 [GOST]: https://en.wikipedia.org/wiki/GOST 
 [this]: https://github.com/gcesarmza/curl-android-ios
@@ -31,3 +33,4 @@ Next, I have found `ssl_mac_pkey_id[SSL_MD_GOST89MAC_IDX]` is initialized in [ss
 [ssl_load_ciphers()]: https://github.com/openssl/openssl/blob/57ac73fb5d0a878f282cbcd9e7951c77fdc59e3c/ssl/ssl_ciph.c#L432
 [initilization]: https://github.com/solardatov/curl-android-ios/blob/master/ssl_ciph.patch#L7
 [ssl_cipher_get_disabled]: https://github.com/openssl/openssl/blob/57ac73fb5d0a878f282cbcd9e7951c77fdc59e3c/ssl/ssl_ciph.c#L750
+[https://github.com/solardatov/curl-android-ios]: https://github.com/solardatov/curl-android-ios
