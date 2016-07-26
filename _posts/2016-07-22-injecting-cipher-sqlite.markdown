@@ -11,7 +11,7 @@ By default SQLite does not provide any encryption. There is [SEE - SQLite Encryp
 
 <!--more-->
 
-Initially, I used [botan-sqlite] as example how to implement own encryption/decryption functionality for SQLite. After applying their patch I got some linkage issues, like unresolved externals `sqlite3_key_v2` and `sqlite3_rekey_v2` and couple of internal functions had changed parameter numbers. After fixing that issues I created own simple Codec wrapping OpenSSL and using AES for encryption memory pages. By default, SQLite page size is 4096 bytes, so you can use any block cipher with key size aliquot to page size. So, we can use AES 128, AES 256, just do not forget set zero padding after cipher initialization.
+Initially, I used [botan-sqlite] as example how to implement own encryption/decryption functionality for SQLite. After applying their patch to the latest stable amalgamation version 3.13.0 I got some linkage issues, like unresolved externals `sqlite3_key_v2` and `sqlite3_rekey_v2` and couple of internal functions had changed parameter numbers. After fixing that issues I created own simple Codec wrapping OpenSSL and using AES for encryption memory pages. By default, SQLite page size is 4096 bytes, so you can use any block cipher with key size aliquot to page size. So, we can use AES 128, AES 256, just do not forget set zero padding after cipher initialization.
 
 {% highlight cpp %}
     EVP_CIPHER_CTX cipherCtx;
