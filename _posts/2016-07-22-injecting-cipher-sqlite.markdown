@@ -7,7 +7,7 @@ published: true
 comments: true
 ---
 
-By default SQLite does not provide any encryption. There is [SEE - SQLite Encryption Extension], which provides RC4 and AES, but you need to buy SEE to get the sources and inject to your SQLite. Here I shortly describe how to implement missing internal and public API to allow SQLite to encrypt your data. It may be useful if you don't want to pay for SEE or if you need something more than RC4 and AES, for example your national ciphers, like russian GOST.
+By default, SQLite does not provide any encryption. There is [SEE - SQLite Encryption Extension], which provides RC4 and AES, but you need to buy SEE to get the sources and inject to your SQLite. Here I shortly describe how to implement missing internal and public API to allow SQLite to encrypt your data. It may be useful if you don't want to pay for SEE or if you need something more than RC4 and AES, for example your national ciphers, like russian GOST.
 
 <!--more-->
 
