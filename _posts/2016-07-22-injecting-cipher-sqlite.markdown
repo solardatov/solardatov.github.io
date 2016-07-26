@@ -36,13 +36,13 @@ int sqlite3_key_v2(sqlite3 *db, const char *zDbName, const void *pKey, int nKey)
 int sqlite3_rekey_v2(sqlite3 *db, const char *zDbName, const void *pKey, int nKey);
 {% endhighlight %}
 
-`sqlite3_activate_see` is for activating original SEE, so we need to implement this function with empty body, just to avoid linkage error. To implement other function we need to write some code :)
+`sqlite3_activate_see` is for activating original SEE, so we need to implement this function with empty body, just to avoid linkage error. To implement other functions we need to write some code :)
 
-Re-keying is out-of-scope of this post, so I will show how to implement two tings
-* Pass key into SQLite
-* Encrypt and decrypt pages using this key
+Re-keying is out-of-scope of this post, so I will show how to implement two things
+- Pass key into SQLite
+- Encrypt and decrypt pages using this key
 
-So, the most important functions are sqlite3CodecAttach and sqlite3Codec, the first one injects your custom object which can store some encryption context (key, pagesize etc) into SQLite, the second one is callback, called every time when SQLite needs to read or write page. So, we can inject our code to encrypt page before writing and decrypt after reading to make it transparent for the end user.
+So, the most important functions are `sqlite3CodecAttach` and `sqlite3Codec`, the first one injects your custom object which can store some encryption context (key, pagesize etc) into SQLite, the second one is callback, called every time when SQLite needs to read or write page. So, we can inject our code to encrypt page before writing and decrypt after reading to make it transparent for the end user.
 
 Before starting we need to define our "codec".
 
@@ -84,7 +84,7 @@ int sqlite3CodecAttach(sqlite3 *db, int nDb, const void *zKey, int nKey)
 
 The implementation of sqlite3CodecAttach is very simple, we just allocate memory for `struct KeyStorage` and call internal function sqlite3PagerSetCodec, setting three callbacks and address of allocated struct.
 
-sqlite3Codec callback gets four arguments: your codec pointer, data to encrypt, page number and mode. "mode" determines what to do with "data" using "pCodec". The size of "data" is page size, passed to sqlite3CodecSizeChange by SQLite.  Of course, we store this value in our codec object.
+sqlite3Codec callback gets four arguments: your codec pointer, data to encrypt, page number and mode. "mode" determines what to do with "data" using "pCodec". The size of "data" is page size, passed to sqlite3CodecSizeChange by SQLite. Of course, we store this value in our codec object.
 
 {% highlight cpp %}
 void sqlite3CodecSizeChange(void *pCodec, int pageSize, int nReserve)
