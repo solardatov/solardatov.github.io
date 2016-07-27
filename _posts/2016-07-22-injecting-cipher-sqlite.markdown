@@ -21,7 +21,7 @@ Initially, I used [botan-sqlite] as example how to implement own encryption/decr
 
 So, here I can show the simplest way without any OpenSSL-related specifics, so I will show simple codec, which can take one byte key and do XOR for SQLite pages using this key before read and write.
 
-As SQLite is open source, the patch for SQLite implemeting our "own SEE" will look like a few internal SQLite functions and four public functions (sqlite3_key_v2, sqlite3_key, sqlite3_rekey_v2, sqlite3_key) and compile SQLite with `-DSQLITE_HAS_CODEC` definition. These functions are listed below.
+As SQLite is open source, the patch for SQLite implementing our "own SEE" will look like a few internal SQLite functions and four public functions (sqlite3_key_v2, sqlite3_key, sqlite3_rekey_v2, sqlite3_key). Also we need to compile SQLite with `-DSQLITE_HAS_CODEC` definition. These functions are listed below.
 
 {% highlight cpp %}
 void sqlite3_activate_see(const char *info);
