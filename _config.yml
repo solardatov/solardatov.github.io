@@ -9,9 +9,9 @@
 title: Vladimir Soldatov's space
 email: solardatov@gmail.com
 description: > # this means to ignore newlines until "baseurl:"
-  Mr. Robot: No rest for the wicked.
+  No rest for the wicked.
 baseurl: "" # the subpath of your site, e.g. /blog
-url: "http://soldatov.org" # the base hostname & protocol for your site
+url: "http://solardatov.github.io" # the base hostname & protocol for your site
 linkedin_username: vsoldatov
 github_username:  solardatov
 twitter_username: solardatov
